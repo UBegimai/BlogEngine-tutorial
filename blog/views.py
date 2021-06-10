@@ -1,10 +1,8 @@
-from django.http import HttpResponse
-from django.shortcuts import render, get_object_or_404
-
-# Create your views here.
+from django.shortcuts import render, get_object_or_404, redirect
 from django.views import View
 
-from blog.models import Post, Tag
+from .models import Post, Tag
+from .forms import TagForm
 from .utils import ObjectDetailMixin
 
 
@@ -21,6 +19,21 @@ class PostDetail(ObjectDetailMixin, View):
 class TagDetail(ObjectDetailMixin, View):
     model = Tag
     template = 'blog/tag_detail.html'
+
+class TagCreate(View):
+    def get(self, request):
+        form = TagForm()
+        return render(request, 'blog/tag_create.html',
+                       context={'form': form})
+
+    def post(self, request):
+        bound_form = TagForm(request.POST)
+
+        if bound_form.is_valid():
+            new_tag = bound_form.save()
+            return redirect(new_tag)
+        return render(request, 'blog/tag_create.html',
+                      context={'form': bound_form})
 
 
 def tags_list(request):
